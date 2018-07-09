@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "416869037476",
+    "firebase_url": "https://ml-kit-practice-a9c1d.firebaseio.com",
+    "project_id": "ml-kit-practice-a9c1d",
+    "storage_bucket": "ml-kit-practice-a9c1d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:416869037476:android:d4664cf8b1ed6231",
+        "android_client_info": {
+          "package_name": "io.github.hunachi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "416869037476-qar43mrv49nge36gr6ab6kmjp2iij32l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAggX_Sx5MR6UuyCVXqJCRqn34U1OX2Pus"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:416869037476:android:964ce893a70a4cc3",
+        "android_client_info": {
+          "package_name": "io.github.hunachi.mlkitpractice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "416869037476-qar43mrv49nge36gr6ab6kmjp2iij32l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAggX_Sx5MR6UuyCVXqJCRqn34U1OX2Pus"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
