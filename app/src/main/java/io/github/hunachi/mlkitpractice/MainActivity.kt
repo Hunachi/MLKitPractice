@@ -9,8 +9,10 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.max
 
@@ -24,8 +26,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         setContentView(R.layout.activity_main)
         
         val detectors = listOf(
-            TEXT_DETECTION
-            // TODO: 3
+            TEXT_DETECTION,
+            FACE_DETECTION
         )
         detectorSpinner.adapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
@@ -57,7 +59,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         )
         
         imageView.setImageBitmap(bitmap)
-    
+        
         overlay.targetWidth = targetWidth
         overlay.targetHeight = targetHeight
     }
@@ -80,15 +82,63 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         for (block in text.blocks) {
                             for (line in block.lines) {
                                 for (element in line.elements) {
-                                    overlay.add(GraphicData(
-                                        element.text,
-                                        element.boundingBox ?: Rect(),
-                                        resources,
-                                        Color.BLUE
-                                    ))
+                                    overlay.add(
+                                        GraphicData(
+                                            element.text,
+                                            element.boundingBox ?: Rect(),
+                                            resources,
+                                            Color.BLUE
+                                        )
+                                    )
                                     Log.d("MainActivity", "${element.text}, ${element.boundingBox}")
                                 }
                             }
+                        }
+                        
+                        if (text.blocks.size <= 0){
+                            Toast.makeText(this, "cannot find any tests", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        detectButton.isEnabled = true
+                        e.printStackTrace()
+                    }
+            }
+            FACE_DETECTION -> {
+                detectButton.isEnabled = false
+                
+                val image = FirebaseVisionImage.fromBitmap(bitmap)
+                
+                val option = FirebaseVisionFaceDetectorOptions.Builder()
+                    .setModeType(FirebaseVisionFaceDetectorOptions.ACCURATE_MODE)
+                    .setLandmarkType(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+                    .setClassificationType(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+                    .setMinFaceSize(0.15f)
+                    .setTrackingEnabled(true)
+                    .build()
+                
+                FirebaseVision.getInstance()
+                    .getVisionFaceDetector(option)
+                    .detectInImage(image)
+                    .addOnSuccessListener { faces ->
+                        detectButton.isEnabled = true
+                        
+                        overlay.clear()
+                        
+                        for (face in faces) {
+                            overlay.add(
+                                GraphicData(
+                                    "",
+                                    face.boundingBox ?: Rect(),
+                                    resources,
+                                    Color.BLUE
+                                )
+                            )
+                            Log.d("MainActivity", "${face.smilingProbability}, ${face.boundingBox}")
+                        }
+                        
+                        if(faces.size <= 0){
+                            Toast.makeText(this, "cannot find any faces", Toast.LENGTH_SHORT).show()
                         }
                     }
                     .addOnFailureListener { e ->
@@ -101,6 +151,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
     
     companion object {
         private const val TEXT_DETECTION = "Text"
+        private const val FACE_DETECTION = "Face"
     }
     
 }
