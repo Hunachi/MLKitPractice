@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
+import com.google.firebase.ml.vision.cloud.FirebaseVisionCloudDetectorOptions
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
 import com.google.firebase.ml.vision.label.FirebaseVisionLabelDetectorOptions
@@ -32,7 +33,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
             TEXT_DETECTION,
             FACE_DETECTION,
             BARCODE_DETECTION,
-            LABELING
+            LABELING,
+            CLOUD_LABELING
         )
         detectorSpinner.adapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
@@ -223,6 +225,37 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
+            CLOUD_LABELING    -> {
+                detectButton.isEnabled = false
+                
+                val image = FirebaseVisionImage.fromBitmap(bitmap)
+                
+                val options = FirebaseVisionCloudDetectorOptions.Builder()
+                    .setModelType(FirebaseVisionCloudDetectorOptions.LATEST_MODEL)
+                    .setMaxResults(15)
+                    .build()
+                
+                FirebaseVision.getInstance()
+                    .getVisionCloudLabelDetector(options)
+                    .detectInImage(image)
+                    .addOnSuccessListener { labels ->
+                        detectButton.isEnabled = true
+                        
+                        overlay.clear()
+                        
+                        for (label in labels) {
+                            Log.d(TAG, "${label.label}, ${label.confidence}")
+                        }
+                        if (labels.size <= 0) {
+                            Toast.makeText(this, "cannot find any labels", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        detectButton.isEnabled = true
+                        e.printStackTrace()
+                    }
+            }
             
         }
     }
@@ -233,7 +266,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         private const val TEXT_DETECTION = "Text"
         private const val FACE_DETECTION = "Face"
         private const val BARCODE_DETECTION = "Barcode"
-        private const val LABELING = "labeling"
+        private const val LABELING = "Label"
+        private const val CLOUD_LABELING = "Cloud label"
     }
     
 }

@@ -8,7 +8,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:416869037476:android:d4664cf8b1ed6231",
+        "mobilesdk_app_id": "",
         "android_client_info": {
           "package_name": "io.github.hunachi"
         }
