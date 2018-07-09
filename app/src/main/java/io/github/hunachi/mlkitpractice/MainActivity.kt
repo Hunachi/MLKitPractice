@@ -34,7 +34,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
             FACE_DETECTION,
             BARCODE_DETECTION,
             LABELING,
-            CLOUD_LABELING
+            CLOUD_LABELING,
+            CLOUD_TEXT_DETECTION
         )
         detectorSpinner.adapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
@@ -75,7 +76,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         
         val detectorName = detectorSpinner.selectedItem as String
         when (detectorName) {
-            TEXT_DETECTION    -> {
+            TEXT_DETECTION       -> {
                 detectButton.isEnabled = false
                 
                 val image = FirebaseVisionImage.fromBitmap(bitmap)
@@ -111,7 +112,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
-            FACE_DETECTION    -> {
+            FACE_DETECTION       -> {
                 detectButton.isEnabled = false
                 
                 val image = FirebaseVisionImage.fromBitmap(bitmap)
@@ -153,7 +154,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
-            BARCODE_DETECTION -> {
+            BARCODE_DETECTION    -> {
                 detectButton.isEnabled = false
                 
                 val image = FirebaseVisionImage.fromBitmap(bitmap)
@@ -194,7 +195,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
-            LABELING          -> {
+            LABELING             -> {
                 detectButton.isEnabled = false
                 
                 val image = FirebaseVisionImage.fromBitmap(bitmap)
@@ -225,7 +226,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
-            CLOUD_LABELING    -> {
+            CLOUD_LABELING       -> {
                 detectButton.isEnabled = false
                 
                 val image = FirebaseVisionImage.fromBitmap(bitmap)
@@ -256,7 +257,52 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
-            
+            CLOUD_TEXT_DETECTION -> {
+                detectButton.isEnabled = false
+                
+                val image = FirebaseVisionImage.fromBitmap(bitmap)
+                
+                val options = FirebaseVisionCloudDetectorOptions.Builder()
+                    .setModelType(FirebaseVisionCloudDetectorOptions.LATEST_MODEL)
+                    .setMaxResults(15)
+                    .build()
+                
+                FirebaseVision.getInstance()
+                    .getVisionCloudTextDetector(options)
+                    .detectInImage(image)
+                    .addOnSuccessListener { cloudText ->
+                        detectButton.isEnabled = true
+                        
+                        overlay.clear()
+                        
+                        for (page in cloudText.pages) {
+                            for (block in page.blocks) {
+                                for (paragraph in block.paragraphs) {
+                                    for (word in paragraph.words) {
+                                        val text =
+                                            word.symbols.joinToString(separator = "") { it.text }
+                                        overlay.add(
+                                            GraphicData(
+                                                text,
+                                                word.boundingBox ?: Rect(),
+                                                resources,
+                                                Color.BLUE
+                                            )
+                                        )
+                                        Log.d(TAG, "$text, ${word.boundingBox}")
+                                    }
+                                }
+                            }
+                        }
+                        if (cloudText.pages.size <= 0) {
+                            Toast.makeText(this, "cannot find any tests", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        detectButton.isEnabled = true
+                        e.printStackTrace()
+                    }
+            }
         }
     }
     
@@ -268,6 +314,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         private const val BARCODE_DETECTION = "Barcode"
         private const val LABELING = "Label"
         private const val CLOUD_LABELING = "Cloud label"
+        private const val CLOUD_TEXT_DETECTION = "Cloud text"
+        
     }
     
 }
