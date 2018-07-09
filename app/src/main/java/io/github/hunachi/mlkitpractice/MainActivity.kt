@@ -5,8 +5,10 @@ import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.ArrayAdapter
-import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.ml.vision.FirebaseVision
+import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.max
 
@@ -23,10 +25,11 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
             TEXT_DETECTION
             // TODO: 3
         )
-        detectorSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
-            .apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
+        detectorSpinner.adapter =
+                ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
+                    .apply {
+                        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    }
         
         detectButton.setOnClickListener {
             bitmap?.let { detect(it) }
@@ -61,7 +64,26 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
             TEXT_DETECTION -> {
                 detectButton.isEnabled = false
                 
-           //     val image = Firebase
+                val image = FirebaseVisionImage.fromBitmap(bitmap)
+                
+                FirebaseVision.getInstance()
+                    .visionTextDetector
+                    .detectInImage(image)
+                    .addOnSuccessListener { text ->
+                        detectButton.isEnabled = true
+                        
+                        for (block in text.blocks) {
+                            for (line in block.lines) {
+                                for (element in line.elements) {
+                                    Log.d("MainActivity", "${element.text}, ${element.boundingBox}")
+                                }
+                            }
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        detectButton.isEnabled = true
+                        e.printStackTrace()
+                    }
             }
         }
     }

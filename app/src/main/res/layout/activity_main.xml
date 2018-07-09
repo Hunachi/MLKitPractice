@@ -8,14 +8,15 @@
 
     <fragment
         android:id="@+id/imagePickFragment"
-        android:name="net.yanzm.mlkitsample.ImagePickFragment"
+        android:name="io.github.hunachi.mlkitpractice.ImagePickFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginStart="16dp"
         app:layout_constraintBottom_toTopOf="@+id/detectButton"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout="@layout/fragment_image_pick" />
+        tools:layout="@layout/fragment_image_pick"
+        android:layout_marginLeft="16dp" />
 
     <Spinner
         android:id="@+id/detectorSpinner"
@@ -50,7 +51,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/detectButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/detectButton"
-        tools:visibility="visible" />
+        tools:visibility="visible"
+        android:layout_marginRight="16dp" />
 
     <ImageView
         android:id="@+id/imageView"
