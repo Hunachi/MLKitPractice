@@ -19,6 +19,6 @@ data class GraphicData internal constructor(
     
     val textPaint = Paint().apply {
         color = textColor
-        textSize = 20 * resources.displayMetrics.density
+        textSize = 15 * resources.displayMetrics.density
     }
 }

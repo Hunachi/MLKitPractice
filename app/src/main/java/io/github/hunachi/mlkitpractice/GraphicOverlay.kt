@@ -51,7 +51,7 @@ class GraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attr
                 canvas.drawRect(rect, graphic.rectPaint)
                 
                 if (graphic.text.isNotEmpty()) {
-                    canvas.drawText(graphic.text, rect.left, rect.bottom, graphic.textPaint)
+                    canvas.drawText(graphic.text, rect.left, rect.bottom + 40, graphic.textPaint)
                 }
             }
         }
