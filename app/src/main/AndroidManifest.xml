@@ -22,7 +22,7 @@
 
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="face,barcode" />
+            android:value="face,barcode,label" />
     </application>
 
 </manifest>

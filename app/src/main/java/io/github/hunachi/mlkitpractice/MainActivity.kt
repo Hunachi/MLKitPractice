@@ -15,6 +15,7 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
+import com.google.firebase.ml.vision.label.FirebaseVisionLabelDetectorOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.max
 
@@ -30,7 +31,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         val detectors = listOf(
             TEXT_DETECTION,
             FACE_DETECTION,
-            BARCODE_DETECTION
+            BARCODE_DETECTION,
+            LABELING
         )
         detectorSpinner.adapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
@@ -180,12 +182,48 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                             )
                             Log.d(TAG, "${barcode.rawValue}, ${barcode.boundingBox}")
                         }
+                        if (barcodes.size <= 0) {
+                            Toast.makeText(this, "cannot find any barcodes", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }
                     .addOnFailureListener { e ->
                         detectButton.isEnabled = true
                         e.printStackTrace()
                     }
             }
+            LABELING          -> {
+                detectButton.isEnabled = false
+                
+                val image = FirebaseVisionImage.fromBitmap(bitmap)
+                
+                val option = FirebaseVisionLabelDetectorOptions.Builder()
+                    .setConfidenceThreshold(0.8f)
+                    .build()
+                
+                FirebaseVision.getInstance()
+                    .getVisionLabelDetector(option)
+                    .detectInImage(image)
+                    .addOnSuccessListener { labels ->
+                        detectButton.isEnabled = true
+                        
+                        overlay.clear()
+                        
+                        for (label in labels) {
+                            //TODO  dekitara hyuoji
+                            Log.d("MainActivity", "${label.label}, ${label.confidence}")
+                        }
+                        if (labels.size <= 0) {
+                            Toast.makeText(this, "cannot find any labels", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        detectButton.isEnabled = true
+                        e.printStackTrace()
+                    }
+            }
+            
         }
     }
     
@@ -195,6 +233,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         private const val TEXT_DETECTION = "Text"
         private const val FACE_DETECTION = "Face"
         private const val BARCODE_DETECTION = "Barcode"
+        private const val LABELING = "labeling"
     }
     
 }

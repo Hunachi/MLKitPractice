@@ -41,4 +41,5 @@ dependencies {
     //FireBase
     implementation "com.google.firebase:firebase-core:$firebase"
     implementation "com.google.firebase:firebase-ml-vision:$firebase"
+    implementation 'com.google.firebase:firebase-ml-vision-image-label-model:15.0.0'
 }
