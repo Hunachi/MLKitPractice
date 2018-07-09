@@ -35,7 +35,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
             BARCODE_DETECTION,
             LABELING,
             CLOUD_LABELING,
-            CLOUD_TEXT_DETECTION
+            CLOUD_TEXT_DETECTION,
+            CLOUD_LANDMARK
         )
         detectorSpinner.adapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
@@ -303,6 +304,49 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
+            CLOUD_LANDMARK       -> {
+                detectButton.isEnabled = false
+                
+                val image = FirebaseVisionImage.fromBitmap(bitmap)
+                
+                val option = FirebaseVisionCloudDetectorOptions.Builder()
+                    .setModelType(FirebaseVisionCloudDetectorOptions.LATEST_MODEL)
+                    .setMaxResults(15)
+                    .build()
+                
+                FirebaseVision.getInstance()
+                    .getVisionCloudLandmarkDetector(option)
+                    .detectInImage(image)
+                    .addOnSuccessListener { landmarks ->
+                        detectButton.isEnabled = true
+                        
+                        overlay.clear()
+                        
+                        for (landmark in landmarks) {
+                            overlay.add(
+                                GraphicData(
+                                    landmark.landmark ?: "",
+                                    landmark.boundingBox ?: Rect(),
+                                    resources,
+                                    Color.RED
+                                )
+                            )
+                            
+                            Log.d(
+                                TAG,
+                                "${landmark.landmark}, ${landmark.confidence}, ${landmark.boundingBox}"
+                            )
+                        }
+                        if (landmarks.size <= 0) {
+                            Toast.makeText(this, "cannot find any landmarks", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        detectButton.isEnabled = true
+                        e.printStackTrace()
+                    }
+            }
         }
     }
     
@@ -315,7 +359,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         private const val LABELING = "Label"
         private const val CLOUD_LABELING = "Cloud label"
         private const val CLOUD_TEXT_DETECTION = "Cloud text"
-        
+        private const val CLOUD_LANDMARK = "Cloud landmark"
     }
     
 }

@@ -8,7 +8,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "",
+        "mobilesdk_app_id": "",//TODO app idを入力して下さいな.
         "android_client_info": {
           "package_name": "io.github.hunachi"
         }
