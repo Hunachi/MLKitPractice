@@ -1,6 +1,8 @@
 package io.github.hunachi.mlkitpractice
 
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -55,6 +57,9 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         )
         
         imageView.setImageBitmap(bitmap)
+    
+        overlay.targetWidth = targetWidth
+        overlay.targetHeight = targetHeight
     }
     
     private fun detect(bitmap: Bitmap) {
@@ -75,6 +80,12 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         for (block in text.blocks) {
                             for (line in block.lines) {
                                 for (element in line.elements) {
+                                    overlay.add(GraphicData(
+                                        element.text,
+                                        element.boundingBox ?: Rect(),
+                                        resources,
+                                        Color.BLUE
+                                    ))
                                     Log.d("MainActivity", "${element.text}, ${element.boundingBox}")
                                 }
                             }
