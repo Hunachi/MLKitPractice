@@ -11,6 +11,8 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.google.firebase.ml.vision.FirebaseVision
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
 import kotlinx.android.synthetic.main.activity_main.*
@@ -27,7 +29,8 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         
         val detectors = listOf(
             TEXT_DETECTION,
-            FACE_DETECTION
+            FACE_DETECTION,
+            BARCODE_DETECTION
         )
         detectorSpinner.adapter =
                 ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, detectors)
@@ -68,7 +71,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
         
         val detectorName = detectorSpinner.selectedItem as String
         when (detectorName) {
-            TEXT_DETECTION -> {
+            TEXT_DETECTION    -> {
                 detectButton.isEnabled = false
                 
                 val image = FirebaseVisionImage.fromBitmap(bitmap)
@@ -90,12 +93,12 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                                             Color.BLUE
                                         )
                                     )
-                                    Log.d("MainActivity", "${element.text}, ${element.boundingBox}")
+                                    Log.d(TAG, "${element.text}, ${element.boundingBox}")
                                 }
                             }
                         }
                         
-                        if (text.blocks.size <= 0){
+                        if (text.blocks.size <= 0) {
                             Toast.makeText(this, "cannot find any tests", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -104,7 +107,7 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                         e.printStackTrace()
                     }
             }
-            FACE_DETECTION -> {
+            FACE_DETECTION    -> {
                 detectButton.isEnabled = false
                 
                 val image = FirebaseVisionImage.fromBitmap(bitmap)
@@ -134,11 +137,48 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
                                     Color.BLUE
                                 )
                             )
-                            Log.d("MainActivity", "${face.smilingProbability}, ${face.boundingBox}")
+                            Log.d(TAG, "${face.smilingProbability}, ${face.boundingBox}")
                         }
                         
-                        if(faces.size <= 0){
+                        if (faces.size <= 0) {
                             Toast.makeText(this, "cannot find any faces", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        detectButton.isEnabled = true
+                        e.printStackTrace()
+                    }
+            }
+            BARCODE_DETECTION -> {
+                detectButton.isEnabled = false
+                
+                val image = FirebaseVisionImage.fromBitmap(bitmap)
+                
+                val option = FirebaseVisionBarcodeDetectorOptions.Builder()
+                    .setBarcodeFormats(
+                        FirebaseVisionBarcode.FORMAT_EAN_8,
+                        FirebaseVisionBarcode.FORMAT_EAN_13
+                    )
+                    .build()
+                
+                FirebaseVision.getInstance()
+                    .getVisionBarcodeDetector(option)
+                    .detectInImage(image)
+                    .addOnSuccessListener { barcodes ->
+                        detectButton.isEnabled = true
+                        
+                        overlay.clear()
+                        
+                        for (barcode in barcodes) {
+                            overlay.add(
+                                GraphicData(
+                                    barcode.rawValue ?: "",
+                                    barcode.boundingBox ?: Rect(),
+                                    resources,
+                                    Color.BLUE
+                                )
+                            )
+                            Log.d(TAG, "${barcode.rawValue}, ${barcode.boundingBox}")
                         }
                     }
                     .addOnFailureListener { e ->
@@ -150,8 +190,11 @@ class MainActivity : AppCompatActivity(), ImagePickFragment.ImagePickListener {
     }
     
     companion object {
+        const val TAG = "MainActivity"
+        
         private const val TEXT_DETECTION = "Text"
         private const val FACE_DETECTION = "Face"
+        private const val BARCODE_DETECTION = "Barcode"
     }
     
 }
